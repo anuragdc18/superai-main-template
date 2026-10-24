@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { DEMO } from "../lib/demo";
 import { Link, useLocation } from "wouter";
 import { ChevronDown, Clock, Mail, Menu, Minus, Phone, Plus, X, ArrowRight, LayoutDashboard } from "lucide-react";
 import { CATEGORIES, serviceUrl, waLink } from "../lib/site";
@@ -45,7 +46,8 @@ export function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [loc] = useLocation();
   const site = useSite();
-  const { data: session } = authClient.useSession();
+  // no login server in the GitHub Pages demo (DEMO never changes at runtime, so this hook order is stable)
+  const { data: session } = DEMO ? { data: null } : authClient.useSession();
 
   useEffect(() => {
     const on = () => setScrolled(window.scrollY > 40);
