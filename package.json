@@ -7,10 +7,11 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "vite build && esbuild src/node-server.ts --bundle --platform=node --target=node20 --format=esm --packages=external --outfile=build/server.mjs",
+    "build": "vite build && node build-server.mjs",
     "start": "node server.js",
     "start:bun": "bun --env-file=.env src/__server.ts",
-    "typecheck": "tsc -p tsconfig.app.json --noEmit && tsc -p tsconfig.node.json --noEmit"
+    "typecheck": "tsc -p tsconfig.app.json --noEmit && tsc -p tsconfig.node.json --noEmit",
+    "build:vercel": "node vercel-build.mjs"
   },
   "dependencies": {
     "@fontsource/poppins": "^5.2.6",
@@ -21,10 +22,16 @@
     "@radix-ui/react-slot": "^1.2.4",
     "@tailwindcss/vite": "^4.2.1",
     "@tanstack/react-query": "^5.100.6",
+    "@tiptap/extension-image": "^3.32.1",
+    "@tiptap/extension-placeholder": "^3.32.1",
+    "@tiptap/pm": "^3.32.1",
+    "@tiptap/react": "^3.32.1",
+    "@tiptap/starter-kit": "^3.32.1",
     "@vitejs/plugin-react": "5.1.4",
     "better-auth": "1.6.29",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "dompurify": "^3.4.17",
     "esbuild": "^0.25.0",
     "hono": "^4.12.10",
     "lucide-react": "^0.577.0",
@@ -46,6 +53,7 @@
     "@types/node": "^25.3.5",
     "@types/react": "19.1.17",
     "@types/react-dom": "19.1.11",
+    "@vercel/nft": "^0.29.4",
     "typescript": "7.0.1-rc"
   }
 }

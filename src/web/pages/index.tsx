@@ -28,6 +28,8 @@ import { CATEGORIES, POPULAR, SLIDES, serviceUrl, waLink } from "../lib/site";
 import { useSite } from "../queries/site";
 import { LeadForm } from "../components/lead-form";
 import { WaIcon } from "../components/header";
+import { useContent } from "../queries/content";
+import { PostCard } from "../components/content-ui";
 import { CertBadges } from "../components/cert-badges";
 
 function HeroSlider() {
@@ -292,14 +294,12 @@ const WHY = [
   { icon: Headphones, title: "Real experts", text: "CA, CS and design experts guide you at every step." },
 ];
 
-const REVIEWS = [
-  { name: "Ravi K.", city: "Hyderabad", text: "My GST and company registration were done in a week. Very smooth, and they explained everything simply." },
-  { name: "Priya S.", city: "Bengaluru", text: "They designed our logo and website together. Looks very professional and customers notice it." },
-  { name: "Arjun M.", city: "Pune", text: "Our Instagram enquiries doubled in 2 months. The team posts on time every week." },
-];
 
 function WhyAndReviews() {
   const site = useSite();
+  const content = useContent();
+  const REVIEWS = content.reviewsSection.show ? content.reviews.slice(0, 3) : [];
+  const rs = content.reviewsSection;
   return (
     <section className="py-16 sm:py-20">
       <div className="container-x grid gap-12 lg:grid-cols-[1fr_1.35fr] lg:items-start">
@@ -320,18 +320,20 @@ function WhyAndReviews() {
             ))}
           </div>
         </div>
-        <div>
+        {REVIEWS.length > 0 && <div>
           <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
             <h3 className="text-xl font-semibold">What Our Clients Say</h3>
-            <span className="flex items-center gap-2 text-[14px]">
-              <span className="flex text-brand">{[0, 1, 2, 3, 4].map((k) => <Star key={k} className="h-4 w-4 fill-current" />)}</span>
-              4.8 on Google
-            </span>
+            {rs.rating && (
+              <a href={rs.googleUrl || undefined} target="_blank" rel="noreferrer" className="flex items-center gap-2 text-[14px]">
+                <span className="flex text-brand">{[0, 1, 2, 3, 4].map((k) => <Star key={k} className="h-4 w-4 fill-current" />)}</span>
+                {rs.rating} on Google{rs.ratingCount ? ` (${rs.ratingCount})` : ""}
+              </a>
+            )}
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             {REVIEWS.map((r, idx) => (
-              <figure key={r.name} className={`rounded-2xl border border-line bg-white p-6 ${idx === 2 ? "sm:col-span-2" : ""}`}>
-                <div className="flex text-brand">{[0, 1, 2, 3, 4].map((k) => <Star key={k} className="h-4 w-4 fill-current" />)}</div>
+              <figure key={r.id} className={`rounded-2xl border border-line bg-white p-6 ${idx === 2 ? "sm:col-span-2" : ""}`}>
+                <div className="flex text-brand">{Array.from({ length: r.rating }, (_, k) => <Star key={k} className="h-4 w-4 fill-current" />)}</div>
                 <blockquote className="mt-3 text-[15px] leading-relaxed text-navy">"{r.text}"</blockquote>
                 <figcaption className="mt-4 flex items-center gap-3">
                   <span className="grid h-10 w-10 place-items-center rounded-full bg-royal text-[14px] font-bold text-white">
@@ -339,28 +341,23 @@ function WhyAndReviews() {
                   </span>
                   <span>
                     <span className="block font-semibold text-navy">{r.name}</span>
-                    <span className="text-[13px]">{r.city}</span>
+                    <span className="text-[13px]">{r.place}</span>
                   </span>
                 </figcaption>
               </figure>
             ))}
           </div>
-        </div>
+        </div>}
       </div>
     </section>
   );
 }
 
-const FAQS = [
-  { q: "Do I need to visit your office?", a: "No. Everything is done online. You can share documents on WhatsApp or email." },
-  { q: "How long does GST registration take?", a: "Usually 3 to 7 working days, once we have all your documents." },
-  { q: "Can you do registration and the website together?", a: "Yes. Many clients start with registration and logo, then add a website. We offer combo prices." },
-  { q: "How do I pay?", a: "You can pay by UPI, debit/credit card or bank transfer. You get a proper GST invoice." },
-  { q: "I'm not sure which registration I need. Can you help?", a: "Yes — that's what the free consultation is for. Our expert will suggest the right option for you." },
-];
 
 function Faq() {
   const [open, setOpen] = useState<number | null>(0);
+  const FAQS = useContent().faqs;
+  if (!FAQS.length) return null;
   return (
     <section className="bg-surface py-16 sm:py-20">
       <div className="container-x max-w-3xl">
@@ -369,7 +366,7 @@ function Faq() {
           {FAQS.map((f, idx) => {
             const isOpen = open === idx;
             return (
-              <div key={f.q} className="rounded-2xl border border-line bg-white">
+              <div key={f.id} className="rounded-2xl border border-line bg-white">
                 <button
                   onClick={() => setOpen(isOpen ? null : idx)}
                   className="flex w-full items-center justify-between gap-4 px-6 py-5 text-left font-semibold text-navy"
@@ -386,6 +383,31 @@ function Faq() {
               </div>
             );
           })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function LatestPosts() {
+  const content = useContent();
+  if (!content.blog.show || !content.posts.length) return null;
+  return (
+    <section className="py-16 sm:py-20">
+      <div className="container-x">
+        <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <p className="mb-2 text-[13px] font-semibold uppercase tracking-[0.14em] text-brand">{content.blog.title || "Blog"}</p>
+            <h2 className="text-3xl font-bold sm:text-[38px] sm:leading-tight">Tips & Guides</h2>
+          </div>
+          <Link to="/blog" className="inline-flex items-center gap-1.5 font-semibold text-royal hover:gap-2.5">
+            See all articles <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {content.posts.slice(0, 3).map((p) => (
+            <PostCard key={p.id} p={p} />
+          ))}
         </div>
       </div>
     </section>
@@ -425,6 +447,7 @@ export default function Index() {
       <Popular />
       <Process />
       <WhyAndReviews />
+      <LatestPosts />
       <Faq />
       <CtaBand />
     </>
