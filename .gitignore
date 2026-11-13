@@ -84,3 +84,5 @@ build/
 
 # local junk folder
 _to_delete/
+
+bun.lock
